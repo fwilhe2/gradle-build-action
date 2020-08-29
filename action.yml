@@ -16,8 +16,10 @@ runs:
       run: |
         mkdir -p public/testresults/${{ steps.time.outputs.timestamp }}
         cp -r build/reports/tests/allTests/* public/testresults/${{ steps.time.outputs.timestamp }}
-        cat >> public/index.html <<EOL
+        mv index.html index.html.old
+        cat > public/index.html.new <<EOL
             <p>
               <a href="testresults/${{ steps.time.outputs.timestamp }}">Test results ${{ github.ref }} ${{ steps.time.outputs.timestamp }}</a>
             </p>
         EOL
+        cat index.html* > index.html
