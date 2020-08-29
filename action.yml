@@ -1,0 +1,26 @@
+inputs:
+  name: 
+    description: 'Your name'
+    default: 'No name provided'
+runs:
+  using: "composite"
+  steps: 
+    - run: ./gradlew check
+      shell: bash
+    - name: get timestamp
+      shell: bash
+      id: time
+      run: echo "::set-output name=timestamp::`date -u +\"%Y-%m-%dT%H-%M-%S%Z\"`"
+    - name: Assamble page
+      shell: bash
+      run: |
+        mkdir -p public/testresults/${{ steps.time.outputs.timestamp }}
+        cp -r build/reports/tests/allTests/* public/testresults/${{ steps.time.outputs.timestamp }}
+        curl https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/index.html > public/index.html.old
+        cat > public/index.html.new <<EOL
+            <p>
+              <a href="testresults/${{ steps.time.outputs.timestamp }}">Test results for branch ${{ github.ref }} from ${{ steps.time.outputs.timestamp }}</a>
+            </p>
+        EOL
+        cat public/index.html* > public/index.html
+        rm public/index.html.*
